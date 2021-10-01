@@ -330,11 +330,12 @@ class UserAEState extends State<UserAE> {
         appBar: AppBar(
           leading: IconButton(
             icon: Icon(Icons.arrow_back),
-            onPressed: () => {
-              Navigator.pushNamed(
-                context,
-                '/user/list',
-              )
+            onPressed: () {
+              Navigator.of(context).pushReplacementNamed('/user/list');
+              // Navigator.pushNamed(
+              //   context,
+              //   '/user/list',
+              // );
             },
           ),
           title: Text(judulMenu),

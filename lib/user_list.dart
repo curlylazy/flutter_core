@@ -180,7 +180,8 @@ class UserListState extends State<UserList> {
               padding: EdgeInsets.only(right: 20.0),
               child: GestureDetector(
                 onTap: () {
-                  Navigator.pushNamed(context, '/user/add');
+                  // Navigator.pushNamed(context, '/user/add');
+                  Navigator.of(context).pushReplacementNamed('/user/add');
                 },
                 child: Icon(Icons.add),
               )),

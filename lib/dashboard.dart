@@ -96,7 +96,7 @@ class _DashboardPageState extends State<DashboardPage> {
           height: 100.0,
           minWidth: 120.0,
           color: Colors.brown[300],
-          textColor: Colors.white,
+          textColor: Colors.yellow[200],
           child: Column(children: [
             Image.asset(
               iconmenu,
