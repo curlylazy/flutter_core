@@ -6,6 +6,28 @@ class IJson {
   var rowArr = {};
   var rowArrs = [];
 
+  var rowArrFile = {};
+  var rowArrsFile = [];
+
+  // JSON Data File
+  newFile() {
+    this.name = "DataFileUpload";
+  }
+
+  addFile(rowname, value) {
+    this.rowArrFile['rowname'] = rowname;
+    this.rowArrFile['value'] = value;
+    this.rowArrsFile.add(this.rowArrFile);
+    this.rowArrFile = {};
+  }
+
+  createFile() {
+    this.tablesArr[this.name] = this.rowArrsFile;
+    this.name = "";
+    this.rowArrsFile = [];
+  }
+
+  // JSON Data String
   newTable(tablename) {
     this.name = tablename;
   }
@@ -32,6 +54,7 @@ class IJson {
   createTable() {
     this.tablesArr[this.name] = this.rowArrs;
     this.name = "";
+    this.rowArrs = [];
   }
 
   generateJson() {

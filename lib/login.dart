@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:localstorage/localstorage.dart';
 
 import 'package:progress_dialog/progress_dialog.dart';
 import 'app/json.dart';
@@ -28,7 +27,28 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final LocalStorage storage = new LocalStorage('session_user');
+  // final LocalStorage storage = new LocalStorage('session_user');
+
+  @override
+  void initState() {
+    super.initState();
+    new Future.delayed(Duration.zero, () async {
+      // var kodeuser = storage.getItem('sessiondata');
+      // print(kodeuser);
+
+      // _onLoad();
+      // if (kodeuser != null) {
+      //   dialogAlert.toastCustom("selamat datang kembali..");
+      //   Navigator.pushNamed(context, '/dashboard');
+      // }
+    });
+  }
+
+  _onLoad() {
+    ctrTxtUsername.text = "";
+    ctrTxtPassword.text = "";
+  }
+
   _onLogin() async {
     try {
       FocusScope.of(context).unfocus();
@@ -71,7 +91,7 @@ class _LoginPageState extends State<LoginPage> {
         'nama': resDataUser['nama'],
       };
 
-      storage.setItem('sessiondata', jsonEncode(sessionObject));
+      // storage.setItem('sessiondata', jsonEncode(sessionObject));
 
       Navigator.pushNamed(context, '/dashboard');
     } catch (e) {
@@ -80,8 +100,8 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   _onGetData() {
-    var kodeuser = storage.getItem('sessiondata');
-    print(kodeuser);
+    // var kodeuser = storage.getItem('sessiondata');
+    // print(kodeuser);
   }
 
   @override

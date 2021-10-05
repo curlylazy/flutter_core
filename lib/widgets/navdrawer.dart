@@ -39,6 +39,16 @@ class NavDrawer extends StatelessWidget {
             onTap: () => {Navigator.pushNamed(context, '/dashboard')},
           ),
           ListTile(
+            leading: Icon(Icons.people),
+            title: Text('User'),
+            onTap: () => {Navigator.pushNamed(context, '/user/list')},
+          ),
+          ListTile(
+            leading: Icon(Icons.people_alt),
+            title: Text('Pelanggan'),
+            onTap: () => {Navigator.pushNamed(context, '/pelanggan/list')},
+          ),
+          ListTile(
             leading: Icon(Icons.exit_to_app),
             title: Text('Logout'),
             onTap: () {

@@ -1,23 +1,30 @@
 // import 'dart:convert';
 
-import 'dart:convert';
+// ignore_for_file: non_constant_identifier_names
 
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:http/http.dart' as http;
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'app/json.dart';
-import 'app/config.dart';
-import 'app/dialog.dart';
-import 'app/ihttpclient.dart';
-import 'app/returndata.dart';
+import 'package:image_picker/image_picker.dart';
+
+import '../../app/json.dart';
+import '../../app/config.dart';
+import '../../app/stringfunction.dart';
+import '../../app/dialog.dart';
+import '../../app/ihttpclient.dart';
+import '../../app/returndata.dart';
 
 const Color primaryColor = Colors.orange;
 
 var ih = new IHttpClient();
 var appConfig = new AppConfig();
 var dialogAlert = new DialogAlert();
+var stringFunction = new StringFunction();
 
-final ctrTxtUsername = TextEditingController();
+final ctrTxtUserPelanggan = TextEditingController();
 final ctrTxtPassword = TextEditingController();
 final ctrTxtNama = TextEditingController();
 final ctrTxtJK = TextEditingController();
@@ -25,96 +32,37 @@ final ctrTxtEmail = TextEditingController();
 final ctrTxtAlamat = TextEditingController();
 final ctrTxtTelepon = TextEditingController();
 
-String username_old = "";
-String kodeuser = "";
+String userpelanggan_old = "";
+String kodepelanggan = "";
 String jk = "";
 String act = "**new";
 String id = "";
 String judulMenu = "";
 String actPage = "";
 
-class UserData {
-  String username;
-  String password;
-  String nama;
-
-  UserData({this.username, this.password, this.nama});
-
+class PelangganAE extends StatefulWidget {
   @override
-  String toString() {
-    return '{ ${this.username}, ${this.password}, ${this.nama} }';
-  }
-
-  factory UserData.createPostResult(Map<String, dynamic> object) {
-    return UserData(
-        username: object['username'],
-        password: object['password'],
-        nama: object['nama']);
-  }
-
-  // static Future<UserData> connectToAPI(String name, String job) async {
-  //   Uri apiURL = https://reqres.in/api/users;
-
-  //   var apiResult = await http.post(apiURL, body: {"name": name, "job": job});
-  //   var jsonObject = json.decode(apiResult.body);
-
-  //   return UserData.createPostResult(jsonObject);
-  // }
-
-  factory UserData.fromJson(Map<String, dynamic> json) {
-    return UserData(
-        username: json['username'],
-        password: json['password'],
-        nama: json['nama']);
-  }
-}
-
-// Future<UserData> fetchAlbum() async {
-//   final response = await http
-//       .get(Uri.parse('https://jsonplaceholder.typicode.com/albums/1'));
-
-//   if (response.statusCode == 200) {
-//     // If the server did return a 200 OK response,
-//     // then parse the JSON.
-//     return UserData.fromJson(jsonDecode(response.body));
-//   } else {
-//     // If the server did not return a 200 OK response,
-//     // then throw an exception.
-//     throw Exception('Failed to load album');
-//   }
-// }
-
-class Album {
-  final int id;
-  final String title;
-
-  Album({this.id, this.title});
-
-  factory Album.fromJson(Map<String, dynamic> json) {
-    return Album(
-      id: json['id'],
-      title: json['title'],
-    );
-  }
-}
-
-class UserAE extends StatefulWidget {
-  @override
-  UserAEState createState() => UserAEState();
+  PelangganAEState createState() => PelangganAEState();
 
   // void initState() {
   //   print("helo");
   // }
 }
 
-class UserAEState extends State<UserAE> {
+class PelangganAEState extends State<PelangganAE> {
+  File gambar_pelanggan_file;
+  String gambar_pelanggan = appConfig.APP_URL + "/gambar/noimage.jpg";
+
   void onLoad() {
     // jk = 'L';
     setState(() {
       jk = 'P';
+      gambar_pelanggan = appConfig.APP_URL + "/gambar/noimage.jpg";
     });
 
-    ctrTxtUsername.text = "iwans_spsp";
+    print(gambar_pelanggan);
+
+    ctrTxtUserPelanggan.text = "iwans_spsp";
     ctrTxtPassword.text = "12345";
     ctrTxtNama.text = "Test User";
     ctrTxtAlamat.text = "Jalan Gang Bubibi";
@@ -122,51 +70,16 @@ class UserAEState extends State<UserAE> {
     ctrTxtTelepon.text = "08563735581";
   }
 
-  postData() async {
-    try {
-      var response = await http
-          .post(Uri.parse("https://jsonplaceholder.typicode.com/posts"), body: {
-        "id": 1.toString(),
-        "name": "iwan",
-        "email": "curlylazy@gmail.com"
-      });
-
-      print(response.body);
-    } catch (e) {
-      print(e);
-    }
-  }
-
-  postDataLumen() async {
-    try {
-      var response = await http.post(
-          Uri.parse("http://192.168.102.50/lumen_2021/public/flutter/postdata"),
-          body: {
-            "id": 1.toString(),
-            "name": "iwan",
-            "email": "curlylazy@gmail.com"
-          });
-
-      print(response.body);
-    } catch (e) {
-      print(e);
-    }
-  }
-
-  getData() async {
-    try {
-      var response = await http.post(
-          Uri.parse("http://192.168.102.50/lumen_2021/public/user/getlist"),
-          body: {
-            "id": 1.toString(),
-            "name": "iwan",
-            "email": "curlylazy@gmail.com"
-          });
-
-      print(response.body);
-    } catch (e) {
-      print(e);
-    }
+  _pickImage() async {
+    // Pick an image
+    final ImagePicker _picker = ImagePicker();
+    final XFile image = await _picker.pickImage(source: ImageSource.gallery);
+    setState(() {
+      gambar_pelanggan_file = File(image.path);
+      gambar_pelanggan = image.path;
+    });
+    // XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    // XFile image = await picker.pickImage(source: ImageSource.gallery);
   }
 
   _loadData() async {
@@ -183,14 +96,14 @@ class UserAEState extends State<UserAE> {
       var reqData = ijson.generateJson();
 
       var res = await ih.sendDataAsync(
-          appConfig.APP_URL, "user/read", reqData, "", "");
+          appConfig.APP_URL, "pelanggan/read", reqData, "", "");
 
       print(res);
 
       await pr.hide();
 
       var resData = jsonDecode(res);
-      var resDataUser = resData['DataUser'];
+      var resDataPelanggan = resData['DataPelanggan'];
       bool status = resData['status'];
 
       if (!status) {
@@ -198,18 +111,30 @@ class UserAEState extends State<UserAE> {
         return;
       }
 
-      ctrTxtUsername.text = resDataUser['username'];
-      ctrTxtPassword.text = resDataUser['password_dec'];
-      ctrTxtNama.text = resDataUser['nama'];
-      ctrTxtEmail.text = resDataUser['email'];
-      ctrTxtAlamat.text = resDataUser['alamat'];
-      ctrTxtTelepon.text = resDataUser['telepon'];
+      ctrTxtUserPelanggan.text = resDataPelanggan['userpelanggan'];
+      ctrTxtPassword.text = resDataPelanggan['password_dec'];
+      ctrTxtNama.text = resDataPelanggan['nama_pelanggan'];
+      ctrTxtEmail.text = resDataPelanggan['email_pelanggan'];
+      ctrTxtAlamat.text = resDataPelanggan['alamat_pelanggan'];
+      ctrTxtTelepon.text = resDataPelanggan['telepon_pelanggan'];
+
+      String gambar_pelanggan_url = "";
+      if (stringFunction.isNullOrEmpty(resDataPelanggan['gambar_pelanggan'])) {
+        gambar_pelanggan_url = appConfig.APP_URL + "/gambar/noimage.jpg";
+      } else {
+        gambar_pelanggan_url = appConfig.APP_URL +
+            "/gambar/" +
+            resDataPelanggan['gambar_pelanggan'];
+      }
 
       setState(() {
-        username_old = resDataUser['username'];
-        kodeuser = resDataUser['kodeuser'];
-        jk = resDataUser['jk'];
+        userpelanggan_old = resDataPelanggan['username'];
+        kodepelanggan = resDataPelanggan['kodepelanggan'];
+        jk = resDataPelanggan['jk_pelanggan'];
+        gambar_pelanggan = gambar_pelanggan_url;
       });
+
+      print(gambar_pelanggan);
     } catch (e) {
       print(e);
       dialogAlert.alertCustom(e, context);
@@ -224,26 +149,29 @@ class UserAEState extends State<UserAE> {
 
       var ijson = new IJson();
       ijson.newTable("DataHeader");
-      ijson.addRow("username_old", username_old);
-      ijson.addRow("kodeuser", kodeuser);
-      ijson.addRow("username", ctrTxtUsername.text);
+      ijson.addRow("userpelanggan_old", userpelanggan_old);
+      ijson.addRow("kodepelanggan", kodepelanggan);
+      ijson.addRow("userpelanggan", ctrTxtUserPelanggan.text);
       ijson.addRow("password", ctrTxtPassword.text);
-      ijson.addRow("nama", ctrTxtNama.text);
-      ijson.addRow("alamat", ctrTxtAlamat.text);
-      ijson.addRow("email", ctrTxtEmail.text);
-      ijson.addRow("telepon", ctrTxtTelepon.text);
-      ijson.addRow("jk", jk);
+      ijson.addRow("nama_pelanggan", ctrTxtNama.text);
+      ijson.addRow("alamat_pelanggan", ctrTxtAlamat.text);
+      ijson.addRow("email_pelanggan", ctrTxtEmail.text);
+      ijson.addRow("telepon_pelanggan", ctrTxtTelepon.text);
+      ijson.addRow("jk_pelanggan", jk);
       ijson.endRow();
       ijson.createTable();
+
+      ijson.newFile();
+      ijson.addFile("gambar_pelanggan", gambar_pelanggan);
+      ijson.createFile();
 
       var reqData = ijson.generateJson();
 
       var res =
-          await ih.sendDataAsync(appConfig.APP_URL, actPage, reqData, "", "");
+          await ih.sendDataFile(appConfig.APP_URL, actPage, reqData, "", "");
 
       await pr.hide();
 
-      print(res);
       var resData = jsonDecode(res);
       bool status = resData['status'];
 
@@ -252,51 +180,31 @@ class UserAEState extends State<UserAE> {
         return;
       }
       dialogAlert.alertCustom(resData['pesan'], context);
+
+      // final uri = 'https://na57.salesforce.com/services/oauth2/token';
+      // var map = new Map<String, dynamic>();
+      // map['grant_type'] = 'password';
+      // map['client_id'] =
+      //     '3MVG9dZJodJWITSviqdj3EnW.LrZ81MbuGBqgIxxxdD6u7Mru2NOEs8bHFoFyNw_nVKPhlF2EzDbNYI0rphQL';
+      // map['client_secret'] =
+      //     '42E131F37E4E05313646E1ED1D3788D76192EBECA7486D15BDDB8408B9726B42';
+      // map['username'] = 'example@mail.com.us';
+      // map['password'] = 'ABC1234563Af88jesKxPLVirJRW8wXvj3D';
+
+      // http.Response response = await http.post(
+      //   Uri.parse(uri),
+      //   body: map,
+      // );
+
+      // print(response.body);
+      // FormData formData = new FormData.from({"name": "wendux"});
+
     } catch (e) {
+      final ProgressDialog pr = ProgressDialog(context, isDismissible: false);
+      await pr.hide();
+      dialogAlert.alertCustom(e.toString(), context);
       print(e);
     }
-
-    // var rest = new ReturnData(resData);
-    // print(rest);
-
-    // try {
-    //   var response = await http.post(
-    //       Uri.parse("http://192.168.102.50/lumen_2021/public/user/tambah"),
-    //       body: {"postdata": reqData});
-
-    //   print(response.body);
-    // } catch (e) {
-    //   print(e);
-    // }
-
-    // try {
-    //   var response = await http.post(
-    //       Uri.parse("http://192.168.102.50/lumen_2021/public/user/tambah"),
-    //       body: {"postdata": reqData});
-
-    //   print(response);
-    // } catch (e) {
-    //   print("KESALAHAN :: " + e);
-    // }
-  }
-
-  void msgInfo(String msg) {
-    AlertDialog alert = AlertDialog(
-      title:
-          Text("PERINGATAN", style: TextStyle(fontSize: 12, letterSpacing: 2)),
-      content: Text(msg),
-      actions: [
-        TextButton(
-            child: Text("OK"), onPressed: () => Navigator.of(context).pop()),
-      ],
-    );
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return alert;
-      },
-    );
   }
 
   @override
@@ -307,12 +215,14 @@ class UserAEState extends State<UserAE> {
       var arguments = ModalRoute.of(context).settings.arguments as Map;
       print(arguments);
       if (arguments == null) {
-        jdlPage = "Tambah User";
-        actPage = "user/tambah";
+        appConfig.APP_SAVE_MODE = appConfig.APP_SAVE_MODE_ADD;
+        jdlPage = "Tambah Pelanggan";
+        actPage = "pelanggan/tambah";
         onLoad();
       } else {
-        jdlPage = "Edit User";
-        actPage = "user/update";
+        appConfig.APP_SAVE_MODE = appConfig.APP_SAVE_MODE_UPD;
+        jdlPage = "Edit Pelanggan";
+        actPage = "pelanggan/update";
         id = arguments['id'];
         await _loadData();
       }
@@ -331,22 +241,34 @@ class UserAEState extends State<UserAE> {
           leading: IconButton(
             icon: Icon(Icons.arrow_back),
             onPressed: () {
-              Navigator.of(context).pushReplacementNamed('/user/list');
-              // Navigator.pushNamed(
-              //   context,
-              //   '/user/list',
-              // );
+              // Navigator.of(context).pushReplacementNamed('/pelanggan/list');
+              Navigator.pushNamed(
+                context,
+                '/pelanggan/list',
+              );
             },
           ),
           title: Text(judulMenu),
         ),
         body: SingleChildScrollView(
           child: Column(children: <Widget>[mainPanel()]),
-        )
-        // body: SingleChildScrollView(
-        //     child: Column(
-        //         children: <Widget>[mainPanel(), radioJK(), btnSimpan()])),
-        );
+        ));
+  }
+
+  Widget _imageContainer() {
+    Widget child;
+    if (gambar_pelanggan_file == null) {
+      child =
+          Container(child: Image.network(gambar_pelanggan, fit: BoxFit.cover));
+    } else {
+      child = Container(
+          child: Image.file(
+        gambar_pelanggan_file,
+        fit: BoxFit.cover,
+      ));
+    }
+
+    return child;
   }
 
   Widget mainPanel() {
@@ -357,7 +279,7 @@ class UserAEState extends State<UserAE> {
           height: 15.0,
         ),
         TextField(
-          controller: ctrTxtUsername,
+          controller: ctrTxtUserPelanggan,
           decoration: const InputDecoration(
               border: OutlineInputBorder(),
               hintText: 'masukkan username',
@@ -412,6 +334,30 @@ class UserAEState extends State<UserAE> {
               border: OutlineInputBorder(),
               hintText: 'masukkan telepon',
               labelText: 'No Telepon'),
+        ),
+        SizedBox(
+          height: 15.0,
+        ),
+        Container(
+            child:
+                Align(child: _imageContainer(), alignment: Alignment.topLeft)),
+        SizedBox(
+          height: 15.0,
+        ),
+        Container(
+          padding: EdgeInsets.all(0),
+          alignment: Alignment.bottomLeft,
+          child: SizedBox(
+              height: 30,
+              width: 150,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  _pickImage();
+                },
+                style: ElevatedButton.styleFrom(primary: Colors.orange),
+                label: Text('Pilih Gambar', style: TextStyle(fontSize: 12)),
+                icon: Icon(Icons.image),
+              )),
         ),
         SizedBox(
           height: 15.0,

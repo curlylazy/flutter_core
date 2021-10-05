@@ -4,15 +4,15 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:progress_dialog/progress_dialog.dart';
-import 'app/json.dart';
-import 'app/config.dart';
-import 'app/dialog.dart';
-import 'app/ihttpclient.dart';
+import '../../app/json.dart';
+import '../../app/config.dart';
+import '../../app/dialog.dart';
+import '../../app/ihttpclient.dart';
 
-import 'widgets/navdrawer.dart';
+import '../../widgets/navdrawer.dart';
 
 const Color primaryColor = Colors.orange;
-const String judulMenu = "Daftar User";
+const String judulMenu = "Daftar Pelanggan";
 
 int totalpage = 1;
 int currentpage = 1;
@@ -21,24 +21,21 @@ var ih = new IHttpClient();
 var appConfig = new AppConfig();
 var dialogAlert = new DialogAlert();
 
-final List dataUser = [];
+final List dataPelanggan = [];
 var dataDetail = {};
 var username = "";
 
 final ctrTxtKataKunci = TextEditingController();
 
-class UserList extends StatefulWidget {
+class PelangganList extends StatefulWidget {
   @override
-  UserListState createState() => UserListState();
+  PelangganListState createState() => PelangganListState();
 }
 
-class UserListState extends State<UserList> {
+class PelangganListState extends State<PelangganList> {
   @override
   void initState() {
     super.initState();
-    // WidgetsBinding.instance.addPostFrameCallback((_) async {
-
-    // });
     new Future.delayed(Duration.zero, () async {
       await _loadData();
     });
@@ -64,9 +61,9 @@ class UserListState extends State<UserList> {
 
   _loadDataDetail(data) {
     dataDetail.clear();
-    dataDetail['kodeuser'] = data['kodeuser'];
-    dataDetail['username'] = data['username'];
-    dataDetail['nama'] = data['nama'];
+    dataDetail['kodepelanggan'] = data['kodepelanggan'];
+    dataDetail['userpelanggan'] = data['userpelanggan'];
+    dataDetail['nama_pelanggan'] = data['nama_pelanggan'];
   }
 
   _hapusData(data) async {
@@ -80,13 +77,13 @@ class UserListState extends State<UserList> {
 
         var ijson = new IJson();
         ijson.newTable("DataHeader");
-        ijson.addRow("kode", data['kodeuser']);
+        ijson.addRow("kode", data['kodepelanggan']);
         ijson.endRow();
         ijson.createTable();
 
         var reqData = ijson.generateJson();
         var res = await ih.sendDataAsync(
-            appConfig.APP_URL, "user/delete", reqData, "", "");
+            appConfig.APP_URL, "pelanggan/delete", reqData, "", "");
 
         await pr.hide();
 
@@ -113,7 +110,7 @@ class UserListState extends State<UserList> {
     FocusScope.of(context).unfocus();
     try {
       setState(() {
-        dataUser.clear();
+        dataPelanggan.clear();
       });
 
       final ProgressDialog pr = ProgressDialog(context, isDismissible: false);
@@ -129,29 +126,32 @@ class UserListState extends State<UserList> {
       var reqData = ijson.generateJson();
 
       var res = await ih.sendDataAsync(
-          appConfig.APP_URL, "user/list", reqData, "", "");
+          appConfig.APP_URL, "pelanggan/list", reqData, "", "");
 
       var resData = jsonDecode(res);
-      var resDataUser = resData['DataUser'];
+      var resDataPelanggan = resData['DataPelanggan'];
       var resDataPaging = resData['DataPaging'];
 
       var arrTemp = [];
-      for (var row in resDataUser) {
+      for (var row in resDataPelanggan) {
         arrTemp.add({
-          'kodeuser': row['kodeuser'],
-          'username': row['username'],
-          'nama': row['nama'],
-          'telepon': row['telepon']
+          'kodepelanggan': row['kodepelanggan'],
+          'userpelanggan': row['userpelanggan'],
+          'nama_pelanggan': row['nama_pelanggan'],
+          'email_pelanggan': row['email_pelanggan'],
+          'gambar_pelanggan': row['gambar_pelanggan'],
+          'telepon_pelanggan': row['telepon_pelanggan']
         });
       }
 
       setState(() {
-        dataUser.addAll(arrTemp);
+        dataPelanggan.addAll(arrTemp);
         totalpage = resDataPaging['totalpage'];
       });
 
       await pr.hide();
     } catch (e) {
+      dialogAlert.alertCustom(e, context);
       print(e);
     }
   }
@@ -180,8 +180,7 @@ class UserListState extends State<UserList> {
               padding: EdgeInsets.only(right: 20.0),
               child: GestureDetector(
                 onTap: () {
-                  // Navigator.pushNamed(context, '/user/add');
-                  Navigator.of(context).pushReplacementNamed('/user/add');
+                  Navigator.pushNamed(context, '/pelanggan/ae');
                 },
                 child: Icon(Icons.add),
               )),
@@ -214,11 +213,11 @@ class UserListState extends State<UserList> {
           Expanded(
             child: ListView.builder(
               padding: EdgeInsets.all(5.0),
-              itemCount: dataUser.length,
+              itemCount: dataPelanggan.length,
               itemBuilder: (context, index) {
                 return InkWell(
                     onTap: () async {
-                      await _loadDataDetail(dataUser[index]);
+                      await _loadDataDetail(dataPelanggan[index]);
                       await showModalBottomSheet(
                           context: context,
                           builder: (context) {
@@ -230,7 +229,7 @@ class UserListState extends State<UserList> {
                                     padding: EdgeInsets.only(
                                         top: 15, left: 15, bottom: 10),
                                     child: Text(
-                                        'Data : ' + dataDetail['username'],
+                                        'Data : ' + dataDetail['userpelanggan'],
                                         style: TextStyle(fontSize: 17))),
                                 ListTile(
                                   leading: Icon(
@@ -240,7 +239,7 @@ class UserListState extends State<UserList> {
                                   title: Text('Hapus',
                                       style: TextStyle(color: Colors.red)),
                                   onTap: () async {
-                                    await _hapusData(dataUser[index]);
+                                    await _hapusData(dataPelanggan[index]);
                                     Navigator.of(context).pop();
                                   },
                                 ),
@@ -248,10 +247,10 @@ class UserListState extends State<UserList> {
                                   leading: Icon(Icons.edit),
                                   title: Text('Edit'),
                                   onTap: () {
-                                    Navigator.pushNamed(context, '/user/add',
-                                        arguments: {
-                                          'id': dataDetail['kodeuser']
-                                        });
+                                    Navigator.pushNamed(
+                                        context, '/pelanggan/ae', arguments: {
+                                      'id': dataDetail['kodepelanggan']
+                                    });
                                   },
                                 ),
                                 ListTile(
@@ -269,51 +268,48 @@ class UserListState extends State<UserList> {
                         child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                          // ListTile(
-                          //   contentPadding: EdgeInsets.all(10),
-                          //   leading: Icon(Icons.people),
-                          //   title: Text(dataUser[index]['username']),
-                          //   subtitle: Text(dataUser[index]['nama'] +
-                          //       '\n' +
-                          //       dataUser[index]['telepon']),
-                          // ),
-                          // Row(
-                          //   mainAxisAlignment: MainAxisAlignment.end,
-                          //   children: <Widget>[
-                          //     TextButton(
-                          //       child: const Text('EDIT'),
-                          //       onPressed: () {/* ... */},
-                          //     ),
-                          //     const SizedBox(width: 8),
-                          //     TextButton(
-                          //       child: const Text('HAPUS'),
-                          //       style: TextButton.styleFrom(
-                          //         primary: Colors.red,
-                          //       ),
-                          //       onPressed: () {/* ... */},
-                          //     ),
-                          //     const SizedBox(width: 8),
-                          //   ],
-                          // ),
-                          Padding(
-                            padding: const EdgeInsets.only(
-                                top: 5, left: 15, bottom: 10),
-                            child: Text(dataUser[index]['username'],
-                                style:
-                                    TextStyle(fontSize: 15, letterSpacing: 3)),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(
-                                top: 0, left: 15, bottom: 5),
-                            child: Text(dataUser[index]['nama'],
-                                style: TextStyle(fontSize: 16)),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(
-                                top: 0, left: 15, bottom: 15),
-                            child: Text(dataUser[index]['telepon'],
-                                style: TextStyle(fontSize: 16)),
-                          ),
+                          Row(children: [
+                            Container(
+                              padding: EdgeInsets.all(5),
+                              height: 100,
+                              width: 100,
+                              child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  child: Image.network(
+                                      appConfig.APP_URL +
+                                          "/gambar/" +
+                                          dataPelanggan[index]
+                                              ['gambar_pelanggan'],
+                                      fit: BoxFit.cover)),
+                            ),
+                            Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                        top: 5, left: 15, bottom: 10),
+                                    child: Text(
+                                        dataPelanggan[index]['userpelanggan'],
+                                        style: TextStyle(
+                                            fontSize: 15, letterSpacing: 3)),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                        top: 0, left: 15, bottom: 5),
+                                    child: Text(
+                                        dataPelanggan[index]['nama_pelanggan'],
+                                        style: TextStyle(fontSize: 16)),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                        top: 0, left: 15, bottom: 15),
+                                    child: Text(
+                                        dataPelanggan[index]
+                                            ['telepon_pelanggan'],
+                                        style: TextStyle(fontSize: 16)),
+                                  ),
+                                ]),
+                          ]),
                         ])));
               },
             ),

@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
 import 'login.dart';
 import 'dashboard.dart';
-import 'user_ae.dart';
-import 'user_list.dart';
+
+// USER
+import 'pages/user/user_ae.dart';
+import 'pages/user/user_list.dart';
+
+// PELANGGAN
+import 'pages/pelanggan/pelanggan_ae.dart';
+import 'pages/pelanggan/pelanggan_list.dart';
+
 import 'ex_nested.dart';
 
 //  ex
@@ -20,10 +27,12 @@ class Nav2App extends StatelessWidget {
         primaryColor: Colors.brown,
         primarySwatch: Colors.brown,
       ),
-      initialRoute: '/login',
+      initialRoute: '/pelanggan/list',
       routes: {
         '/': (context) => new LoginPage(),
         '/login': (context) => new LoginPage(),
+        '/pelanggan/list': (context) => new PelangganList(),
+        '/pelanggan/ae': (context) => new PelangganAE(),
         '/user/list': (context) => new UserList(),
         '/user/add': (context) => new UserAE(),
         '/dashboard': (context) => new DashboardPage(),

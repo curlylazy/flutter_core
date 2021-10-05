@@ -1,10 +1,12 @@
 import 'dart:convert';
 
+import './app/dialog.dart';
 import 'package:flutter/material.dart';
-import 'package:localstorage/localstorage.dart';
 
 var username = "";
 var nama = "";
+
+var dialogAlert = new DialogAlert();
 
 class DashboardPage extends StatefulWidget {
   // const DashboardPage({ Key? key }) : super(key: key);
@@ -13,56 +15,65 @@ class DashboardPage extends StatefulWidget {
   _DashboardPageState createState() => _DashboardPageState();
 }
 
-showAlertDialog(BuildContext context) {
-  // set up the buttons
-  Widget cancelButton = TextButton(
-    child: Text("Cancel"),
-    onPressed: () {
-      Navigator.of(context).pop(); // dismiss dialog
-    },
-  );
-  Widget continueButton = TextButton(
-    child: Text("Continue"),
-    onPressed: () {
-      Navigator.of(context).pushNamed('/');
-    },
-  );
-  // set up the AlertDialog
-  AlertDialog alert = AlertDialog(
-    title: Text(
-      "KONFIRMASI",
-      style: TextStyle(fontSize: 12, letterSpacing: 2),
-    ),
-    content: Text("Log out dari sistem ?"),
-    actions: [
-      cancelButton,
-      continueButton,
-    ],
-  );
-  // show the dialog
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return alert;
-    },
-  );
+showAlertDialog(BuildContext context) async {
+  // final LocalStorage storage = new LocalStorage('session_user');
+  var msg = "Apakah anda ingin keluar dari sistem ?.";
+  var isLogOut = await dialogAlert.confirmAlertDialog(context, 'LOG OUT', msg);
+
+  if (isLogOut) {
+    // storage.clear();
+    Navigator.of(context).pushNamed('/login');
+  }
+
+  // // set up the buttons
+  // Widget cancelButton = TextButton(
+  //   child: Text("Cancel"),
+  //   onPressed: () {
+  //     Navigator.of(context).pop(); // dismiss dialog
+  //   },
+  // );
+  // Widget continueButton = TextButton(
+  //   child: Text("Continue"),
+  //   onPressed: () {
+  //     Navigator.of(context).pushNamed('/');
+  //   },
+  // );
+  // // set up the AlertDialog
+  // AlertDialog alert = AlertDialog(
+  //   title: Text(
+  //     "KONFIRMASI",
+  //     style: TextStyle(fontSize: 12, letterSpacing: 2),
+  //   ),
+  //   content: Text("Log out dari sistem ?"),
+  //   actions: [
+  //     cancelButton,
+  //     continueButton,
+  //   ],
+  // );
+  // // show the dialog
+  // showDialog(
+  //   context: context,
+  //   builder: (BuildContext context) {
+  //     return alert;
+  //   },
+  // );
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-  final LocalStorage storage = new LocalStorage('session_user');
+  // final LocalStorage storage = new LocalStorage('session_user');
   void initState() {
     super.initState();
     // WidgetsBinding.instance.addPostFrameCallback((_) async {
 
     // });
     new Future.delayed(Duration.zero, () async {
-      var res = jsonDecode(storage.getItem('sessiondata'));
-      print(res['username']);
+      // var res = jsonDecode(storage.getItem('sessiondata'));
+      // print(res['username']);
 
-      setState(() {
-        username = res['username'];
-        nama = res['nama'];
-      });
+      // setState(() {
+      //   username = res['username'];
+      //   nama = res['nama'];
+      // });
     });
   }
 
@@ -76,10 +87,10 @@ class _DashboardPageState extends State<DashboardPage> {
         Row(mainAxisAlignment: MainAxisAlignment.start, children: [
           menuData(context, 'Data User',
               'assets/images/014-customer service.png', '/user/list'),
+          menuData(context, 'Data Pelanggan', 'assets/images/009-courier.png',
+              '/pelanggan/list'),
           menuData(
               context, 'Data Item', 'assets/images/002-french fries.png', ''),
-          menuData(
-              context, 'Data Pelanggan', 'assets/images/009-courier.png', ''),
         ]),
         Row(
             mainAxisAlignment: MainAxisAlignment.start,
